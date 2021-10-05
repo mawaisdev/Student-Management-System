@@ -1,13 +1,14 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
-from StudentManagementApp.models import CustomUser, Staffs, Courses, Subject
+from StudentManagementApp.models import CustomUser, Staffs, Courses, Subject, Students
 
 
 def admin_home(request):
     return render(request, "HOD/home_content.html")
 
 # ------------------------------------------------- Staff Section -----------------------------------
+
 
 def add_staff(request):
     return render(request, "HOD/add_staff.html")
@@ -38,8 +39,10 @@ def add_staff_save(request):
 
 
 def manage_staff(request):
-    pass
+    staffs = Staffs.objects.all()
+    return render(request, "HOD/manage_staff.html", {"staffs": staffs})
 # ------------------------------------------------- Course Section ----------------------------------
+
 
 def add_course(request):
     return render(request, "HOD/add_course.html")
@@ -61,6 +64,9 @@ def add_course_save(request):
             return HttpResponseRedirect("/add_course")
 
 
+def manage_course(request):
+    courses = Courses.objects.all()
+    return render(request, "HOD/manage_course.html", {"courses": courses})
 # ------------------------------------------------- Student Section ---------------------------------
 def add_student(request):
     courses = Courses.objects.all()
@@ -82,6 +88,7 @@ def add_student_save(request):
         course_id = request.POST.get("course")
         Gender = request.POST.get("gender")
 
+
         try:
             user = CustomUser.objects.create_user(username=user_name, password=password, email=email,
                                                   first_name=first_name,
@@ -95,12 +102,17 @@ def add_student_save(request):
             user.students.Profile = ""
             user.students.Gender = Gender
             user.save()
+            messages.success(request, "Successfully Added Student")
+            return HttpResponseRedirect("/add_student")
         except:
             messages.error(request, "Failed to Add Student")
             return HttpResponseRedirect("/add_student")
-        else:
-            messages.success(request, "Successfully Added Student")
-            return HttpResponseRedirect("/add_student")
+
+
+
+def manage_student(request):
+    students = Students.objects.all()
+    return render(request, "HOD/manage_student.html", {"students": students})
 
 
 # ------------------------------------------------- Subject Section ---------------------------------
@@ -127,3 +139,8 @@ def add_subject_save(request):
         except:
             messages.error(request, "Failed to Add Subject")
             return HttpResponseRedirect("/add_subject")
+
+
+def manage_subject(request):
+    subjects = Subject.objects.all()
+    return render(request, "HOD/manage_subject.html", {"subjects": subjects})
