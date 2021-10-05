@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
-from StudentManagementApp.models import CustomUser, Staffs, Courses
+from StudentManagementApp.models import CustomUser, Staffs, Courses, Subject
 
 
 def admin_home(request):
@@ -27,8 +27,7 @@ def add_staff_save(request):
             user = CustomUser.objects.create_user(username=user_name, password=password, email=email,
                                                   first_name=first_name,
                                                   last_name=last_name, user_type=2)
-            # user.Staffs.address = address
-            user.staffs.address = address
+            user.staffs.Address = address
             user.save()
         except:
             messages.error(request, "Failed to Add Staff")
@@ -38,6 +37,8 @@ def add_staff_save(request):
             return HttpResponseRedirect("/add_staff")
 
 
+def manage_staff(request):
+    pass
 # ------------------------------------------------- Course Section ----------------------------------
 
 def add_course(request):
@@ -100,3 +101,29 @@ def add_student_save(request):
         else:
             messages.success(request, "Successfully Added Student")
             return HttpResponseRedirect("/add_student")
+
+
+# ------------------------------------------------- Subject Section ---------------------------------
+def add_subject(request):
+    courses = Courses.objects.all()
+    staffs = CustomUser.objects.filter(user_type=2)
+    return render(request, "HOD/add_subject.html", {"staffs": staffs, "courses": courses})
+
+
+def add_subject_save(request):
+    if request.method != "POST":
+        return HttpResponse("<h2>Method Not Allowed</h2>")
+    else:
+        subject_name = request.POST.get("subject_name")
+        course_id = request.POST.get("course")
+        course = Courses.objects.get(ID=course_id)
+        s_id = request.POST.get("staffID")
+        staff = CustomUser.objects.get(id=s_id)
+        try:
+            subject = Subject(subjectName=subject_name, courseID=course, staffID=staff)
+            subject.save()
+            messages.success(request, "Subject Added Successfully")
+            return HttpResponseRedirect("/add_subject")
+        except:
+            messages.error(request, "Failed to Add Subject")
+            return HttpResponseRedirect("/add_subject")

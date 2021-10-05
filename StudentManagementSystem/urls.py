@@ -34,6 +34,9 @@ urlpatterns = [
     path('add_course_save',HODViews.add_course_save),
     path('add_course',HODViews.add_course),
     path('add_student_save',HODViews.add_student_save),
-    path('add_student',HODViews.add_student)
+    path('add_student',HODViews.add_student),
+    path('add_subject_save',HODViews.add_subject_save),
+    path('add_subject',HODViews.add_subject),
+    path('manage_staff',HODViews.manage_staff)
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,
                                                                        document_root=settings.STATIC_ROOT)

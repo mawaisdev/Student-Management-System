@@ -49,7 +49,7 @@ class Subject(models.Model):
     ID = models.AutoField(primary_key=True)
     subjectName = models.CharField(max_length=255)
     courseID = models.ForeignKey(Courses, on_delete=models.CASCADE, default=1)
-    staffID = models.ForeignKey(Staffs,on_delete=models.CASCADE)
+    staffID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     Created_at = models.DateField(auto_now_add=True)
     Updated_at = models.DateField(auto_now_add=True)
     objects = models.Manager()
