@@ -9,19 +9,31 @@ Function views
 Class-based views
     1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
+Including another URL conf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from os import name
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from django.conf.urls.static import static
-from StudentManagementSystem import settings
+
 from StudentManagementApp import views
+from StudentManagementApp import HODViews
+from StudentManagementSystem import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('demo/', views.showDemoPage),
-    path("home/", views.Home, name = "Hello")
-]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+    path("", views.login_user),
+    path("getUserDetails", views.GetUserDetails),
+    path("logout_user", views.logout_user),
+    path("dologin", views.dologin),
+    path('admin_home',HODViews.admin_home),
+    path('add_staff',HODViews.add_staff),
+    path('add_staff_save',HODViews.add_staff_save),
+    path('add_course_save',HODViews.add_course_save),
+    path('add_course',HODViews.add_course),
+    path('add_student_save',HODViews.add_student_save),
+    path('add_student',HODViews.add_student)
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+static(settings.STATIC_URL,
+                                                                       document_root=settings.STATIC_ROOT)

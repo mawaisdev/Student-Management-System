@@ -132,8 +132,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 AUTH_USER_MODEL = "StudentManagementApp.CustomUser"
+AUTHENTICATION_BACKENDS = ["StudentManagementApp.EmailBackend.EmailBackEnd"]
 
-# Default primary key field type
+# Default primary key field type0
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
