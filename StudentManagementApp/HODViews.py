@@ -41,6 +41,41 @@ def add_staff_save(request):
 def manage_staff(request):
     staffs = Staffs.objects.all()
     return render(request, "HOD/manage_staff.html", {"staffs": staffs})
+
+# Here in this function i added two parameters ( first default request, staff_id from url )
+
+
+def edit_staff(request, staff_id):
+    staff = Staffs.objects.get(admin=staff_id)
+    return render(request, "HOD/edit_staff.html", {"staff": staff})
+
+
+def edit_staff_save(request):
+    if request.method != "POST":
+        return HttpResponse("Method Not Allowed")
+    else:
+        staff_id = request.POST.get("staff_id")
+        first_name = request.POST.get("firstname")
+        last_name = request.POST.get("lastname")
+        email = request.POST.get("email")
+        username = request.POST.get("username")
+        address = request.POST.get("address")
+        staff = CustomUser.objects.get(id=staff_id)
+        staff_model = Staffs.objects.get(admin=staff_id)
+        try:
+            staff.first_name = first_name
+            staff.last_name = last_name
+            staff.email = email
+            staff.username = username
+            staff.save()
+
+            staff_model.Address = address
+            staff_model.save()
+            messages.success(request, "Successfully Modified Staff")
+            return HttpResponseRedirect("/edit_staff/"+staff_id)
+        except:
+            messages.error(request, "Failed to Modify Staff")
+            return HttpResponseRedirect("/edit_staff/" + staff_id)
 # ------------------------------------------------- Course Section ----------------------------------
 
 
@@ -68,6 +103,8 @@ def manage_course(request):
     courses = Courses.objects.all()
     return render(request, "HOD/manage_course.html", {"courses": courses})
 # ------------------------------------------------- Student Section ---------------------------------
+
+
 def add_student(request):
     courses = Courses.objects.all()
     return render(request, "HOD/add_student.html", {"courses": courses})
@@ -109,10 +146,18 @@ def add_student_save(request):
             return HttpResponseRedirect("/add_student")
 
 
-
 def manage_student(request):
     students = Students.objects.all()
     return render(request, "HOD/manage_student.html", {"students": students})
+
+
+def edit_student(request, student_id):
+    student = Students.objects.get(admin=student_id)
+    return render(request, "HOD/edit_student.html", {"student": student})
+
+
+def edit_student_save(request):
+    pass
 
 
 # ------------------------------------------------- Subject Section ---------------------------------
