@@ -1,3 +1,4 @@
+from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
@@ -47,7 +48,7 @@ def manage_staff(request):
 
 def edit_staff(request, staff_id):
     staff = Staffs.objects.get(admin=staff_id)
-    return render(request, "HOD/edit_staff.html", {"staff": staff})
+    return render(request, "HOD/edit_staff.html", {"staff": staff, "id": staff_id})
 
 
 def edit_staff_save(request):
@@ -91,17 +92,39 @@ def add_course_save(request):
             course_name = request.POST.get("course_name")
             course = Courses(courseName=course_name)
             course.save()
+            messages.success(request, "Course Added Successfully")
+            return HttpResponseRedirect("/add_course")
         except:
             messages.error(request, "Failed to Add Course")
-            return HttpResponseRedirect("/add_course")
-        else:
-            messages.success(request, "Course Added Successfully")
             return HttpResponseRedirect("/add_course")
 
 
 def manage_course(request):
     courses = Courses.objects.all()
     return render(request, "HOD/manage_course.html", {"courses": courses})
+
+
+def edit_course(request, course_id):
+    course = Courses.objects.get(ID=course_id)
+    return render(request, "HOD/edit_course.html", {"course": course, "id": course_id})
+
+
+def edit_course_save(request):
+    if request.method != "POST":
+        return HttpResponse("Method Not allowed")
+    else:
+        course_id = request.POST.get("course_id")
+        course_name = request.POST.get("course_name")
+        try:
+            course = Courses.objects.get(ID=course_id)
+            course.courseName = course_name
+            course.save()
+            messages.success(request, "Course Updated Successfully")
+            return HttpResponseRedirect("/edit_course/"+str(course.ID))
+        except:
+            messages.error(request, "Failed to Update Course")
+            return HttpResponseRedirect("/edit_course/"+str(course.ID))
+
 # ------------------------------------------------- Student Section ---------------------------------
 
 
@@ -124,7 +147,10 @@ def add_student_save(request):
         session_end_year = request.POST.get("session_end_date")
         course_id = request.POST.get("course")
         Gender = request.POST.get("gender")
-
+        profile_pic = request.FILES['profile_pic']
+        fs = FileSystemStorage()
+        filename = fs.save(profile_pic.name, profile_pic)
+        profile_pic_url = fs.url(filename)
 
         try:
             user = CustomUser.objects.create_user(username=user_name, password=password, email=email,
@@ -136,7 +162,7 @@ def add_student_save(request):
             user.students.courseID = course_obj
             user.students.session_start_year = session_start_year
             user.students.session_end_year = session_end_year
-            user.students.Profile = ""
+            user.students.Profile = profile_pic_url
             user.students.Gender = Gender
             user.save()
             messages.success(request, "Successfully Added Student")
@@ -155,7 +181,7 @@ def edit_student(request, student_id):
     student = Students.objects.get(admin=student_id)
     courses = Courses.objects.all()
 
-    return render(request, "HOD/edit_student.html", {"student": student, "courses": courses})
+    return render(request, "HOD/edit_student.html", {"student": student, "courses": courses, "id": student_id})
 
 
 def edit_student_save(request):
@@ -172,6 +198,13 @@ def edit_student_save(request):
         session_end_year = request.POST.get("session_end_date")
         course_id = request.POST.get("course")
         Gender = request.POST.get("gender")
+        if request.FILES.get('profile_pic', False):
+            profile_pic = request.FILES['profile_pic']
+            fs = FileSystemStorage()
+            filename = fs.save(profile_pic.name, profile_pic)
+            profile_pic_url = fs.url(filename)
+        else:
+            profile_pic_url = None
 
         try:
             user = CustomUser.objects.get(id=student_id)
@@ -186,6 +219,8 @@ def edit_student_save(request):
             student.session_start_year = session_start_year
             student.session_end_year = session_end_year
             student.Gender = Gender
+            if profile_pic_url is not None:
+                student.Profile = profile_pic_url
 
             course = Courses.objects.get(ID=course_id)
             student.courseID = course
@@ -226,3 +261,35 @@ def add_subject_save(request):
 def manage_subject(request):
     subjects = Subject.objects.all()
     return render(request, "HOD/manage_subject.html", {"subjects": subjects})
+
+
+def edit_subject(request, subject_id):
+    courses = Courses.objects.all()
+    staffs = CustomUser.objects.filter(user_type=2)
+    subject = Subject.objects.get(ID=subject_id)
+    return render(request, "HOD/edit_subject.html", {"staffs": staffs, "courses": courses,
+                                                     "subject": subject, "id": subject_id})
+
+
+def edit_subject_save(request):
+    if request.method != "POST":
+        return HttpResponse("<h2>Method Not Allowed</h2>")
+    else:
+        subject_id = request.POST.get("subject_id")
+        subject_name = request.POST.get("subject_name")
+        course_id = request.POST.get("course")
+        course = Courses.objects.get(ID=course_id)
+        s_id = request.POST.get("staffID")
+        staff = CustomUser.objects.get(id=s_id)
+        try:
+            subject = Subject.objects.get(ID=subject_id)
+            subject.subjectName = subject_name
+            subject.courseID_id = course
+            subject.staffID_id = staff
+
+            subject.save()
+            messages.success(request, "Subject Updated Successfully")
+            return HttpResponseRedirect("/edit_subject/"+str(subject_id))
+        except:
+            messages.error(request, "Failed to Update Subject")
+            return HttpResponseRedirect("/edit_subject/"+str(subject_id))
