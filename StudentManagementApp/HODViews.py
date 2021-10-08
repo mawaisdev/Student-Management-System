@@ -153,11 +153,48 @@ def manage_student(request):
 
 def edit_student(request, student_id):
     student = Students.objects.get(admin=student_id)
-    return render(request, "HOD/edit_student.html", {"student": student})
+    courses = Courses.objects.all()
+
+    return render(request, "HOD/edit_student.html", {"student": student, "courses": courses})
 
 
 def edit_student_save(request):
-    pass
+    if request.method != "POST":
+        return HttpResponse("Method Not Allowed")
+    else:
+        student_id = request.POST.get("studentID")
+        first_name = request.POST.get("firstname")
+        last_name = request.POST.get("lastname")
+        username = request.POST.get("username")
+        address = request.POST.get("address")
+        email = request.POST.get("email")
+        session_start_year = request.POST.get("session_start_date")
+        session_end_year = request.POST.get("session_end_date")
+        course_id = request.POST.get("course")
+        Gender = request.POST.get("gender")
+
+        try:
+            user = CustomUser.objects.get(id=student_id)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.username = username
+            user.email = email
+            user.save()
+
+            student = Students.objects.get(admin=student_id)
+            student.Address = address
+            student.session_start_year = session_start_year
+            student.session_end_year = session_end_year
+            student.Gender = Gender
+
+            course = Courses.objects.get(ID=course_id)
+            student.courseID = course
+            student.save()
+            messages.success(request, "Successfully Updated Student")
+            return HttpResponseRedirect("/edit_student/"+student_id)
+        except:
+            messages.error(request, "Failed to Update Student")
+            return HttpResponseRedirect("/add_student/"+student_id)
 
 
 # ------------------------------------------------- Subject Section ---------------------------------
